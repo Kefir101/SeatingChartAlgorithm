@@ -1,4 +1,9 @@
-
+const gridSize = 5;
+let positionScore = 0;
+let previousPositionScore = positionScore;
+let students = []; //2 x 5 grid
+let studentCount = 2 * gridSize;
+const preferenceCount = 2;
 class Student {
   constructor(name_, frontPreference_, backPreference_, sitNextTo_, doNotSitNextTo_) {
     this.name = name_;
@@ -10,12 +15,6 @@ class Student {
     this.sad = "";
   }
 }
-const gridSize = 5;
-let positionScore = 0;
-let previousPositionScore = positionScore;
-let students = []; //2 x 5 grid
-let studentCount = 2 * gridSize;
-const preferenceCount = 2;
 function setup() {
   createCanvas(1000, 1000);
   for (let i = 0; i < studentCount; i++) {
@@ -30,14 +29,17 @@ function setup() {
       student.doNotSitNextTo[j] = students[indexes[j + preferenceCount]].name;
     }
   }
-  randomizePositions();
+  shuffleStudents();
   countScore();
   loopChanges();
 }
 function draw() {
   let x = 50, y = 50;
+  fill(255, 0, 0);
+  rect(0, 0, 500, 300);
   textSize(10);
   stroke(0);
+  fill(0)
   for (let i = 0; i < students.length; i++) {
     let student = students[i]
     text(student.name, x, y);
@@ -99,7 +101,7 @@ function countScore() {
       if (pos == i + 1 && i + 1 % gridSize == 0) continue;
       if (pos == i - 1 && i % gridSize == 0) continue;
       closeNames.push(students[pos].name);
-      if(closeNames.length == 2) break;
+      if (closeNames.length == 2) break;
     }
     // let closeNamesTemp = [];
     // for (let j = 0; j < nameCount; j++)
@@ -112,8 +114,8 @@ function countScore() {
       let closeName = closeNames[j];
       if (sitNextTo.includes(closeName)) {
         positionScore += 100;
-        s.happy += closeName + ", "; 
-      }else if (doNotSitNextTo.includes(closeName)) {
+        s.happy += closeName + ", ";
+      } else if (doNotSitNextTo.includes(closeName)) {
         positionScore -= 200;
         s.sad += closeName + ", ";
       }
@@ -121,9 +123,6 @@ function countScore() {
     if (i < gridSize && frontPreference) positionScore += 5;
     if (students.length - i <= gridSize && backPreference) positionScore += 5;
   }
-}
-function randomizePositions() {
-  shuffleArray(students);
 }
 function swapCountAndScore() {
   swapStudents();
@@ -133,58 +132,33 @@ function swapCountAndScore() {
   return positionScoreChange;
 }
 function loopChanges() {
-  let positionScoreChange = -1;
-  //        while (positionScoreChange != 0) {
-  //            swapStudents();
-  //            countScore();
-  //            positionScoreChange = positionScore - previousPositionScore;
-  //            previousPositionScore = positionScore;
-  //        }
-  // let storeStudents = [];
-  // let iterations = 1000;
-  // for (let i = 0; i < 100000; i++) {
-  //   positionScoreChange = swapCountAndScore();
-  //   for (let j = 0; j < iterations; j++) { //run loop again
-  //     positionScoreChange = swapCountAndScore();
-  //     if (positionScoreChange > 0) { //if for that entire loop not a single arrangment is better
-  //       storeStudents = students;
-  //       break; //restart if isn't the best
-  //     }
-  //     if(j == iterations-1){
-  //       printStudents(storeStudents);
-  //       console.log(positionScore);
-  //       break;
-  //     }
-  //   }
-  // }
+
   let storeStudents = [];
   let storeScores = [];
 
-  for(let i = 0; i < 100000; i++){
-    swapStudents();
+  for (let i = 0; i < 100000; i++) {
+    shuffleStudents();
     countScore();
-    storeStudents.push(students);
+    let studentKey = [];
+    for (let j = 0; j < students.length; j++) studentKey.push(Object.assign({}, students[j]))
+    storeStudents.push(studentKey);
     storeScores.push(positionScore);
   }
   var indexOfMaxValue = storeScores.reduce((iMax, x, i, storeScores) => x > storeScores[iMax] ? i : iMax, 0); //google
-  console.log(storeStudents[indexOfMaxValue])
+  students = storeStudents[indexOfMaxValue];
   console.log(storeScores[indexOfMaxValue])
   printStudents(storeStudents[indexOfMaxValue])
+
 }
-function printStudents(students) {
-  let names = "";
-  let happy = "";
-  let frontPref = "";
-  let backPref = "";
-  let sitNextTo = "";
-  let doNotSitNextTo = "";
-  for (let i = 0; i < students.length; i++) {
-    let student = students[i];
+function printStudents(students_) {
+  let names = "", happy = "", frontPref = "", backPref = "", sitNextTo = "", doNotSitNextTo = "";
+  for (let i = 0; i < students_.length; i++) {
+    let student = students_[i];
     if ((i + 1) % gridSize == 0) {
       names += student.name + " \n";
     } else {
       names += student.name + ", ";
-    } 
+    }
     happy += (student.happy.length > 0) + ", ";
     frontPref += student.frontPreference + ", ";
     backPref += student.backPreference + ", ";
@@ -199,13 +173,60 @@ function printStudents(students) {
   console.log("Sit Next To: " + sitNextTo);
   console.log("Do Not Sit Next To: " + doNotSitNextTo);
 }
-function shuffleArray(array) {
-  var currentIndex = array.length, randomIndex;
+function shuffleStudents() {
+  var currentIndex = students.length, randomIndex;
   while (currentIndex != 0) {
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex], array[currentIndex]];
+    [students[currentIndex], students[randomIndex]] = [
+      students[randomIndex], students[currentIndex]];
   }
-  return array;
 }
+// let positionScoreChange = -1;
+
+// while (positionScoreChange != 0) {
+//   swapStudents();
+//   countScore();
+//   positionScoreChange = positionScore - previousPositionScore;
+//   previousPositionScore = positionScore;
+// }
+// let storeStudents = [];
+// let iterations = 1000;
+// for (let i = 0; i < 100000; i++) {
+//   positionScoreChange = swapCountAndScore();
+//   for (let j = 0; j < iterations; j++) { //run loop again
+//     positionScoreChange = swapCountAndScore();
+//     if (positionScoreChange > 0) { //if for that entire loop not a single arrangment is better
+//       storeStudents = students;
+//       break; //restart if isn't the best
+//     }
+//     if (j == iterations - 1) {
+//       printStudents(storeStudents);
+//       console.log(positionScore);
+//       break;
+//     }
+//   }
+// }
+// let studentsAndScoresDist = {};
+// let testing = [[]];
+// for (let i = 0; i < 5; i++) {
+//   shuffleStudents();
+//   countScore();
+//   let studentKey = [];
+//   for (let j = 0; j < students.length; j++) studentKey.push(Object.assign({}, students[j]))
+//   studentsAndScoresDist[studentKey] = positionScore;
+//   testing.push(studentKey);
+// }
+// console.log(testing)
+// console.log(Object.values(studentsAndScoresDist))
+// console.log(Object.keys(studentsAndScoresDist).length)
+// let maxStudent = students, maxScore = 0;
+// for (const [key, value] of Object.entries(studentsAndScoresDist)) {
+//   if (value > maxScore) {
+//     maxStudent = key;
+//     maxScore = value;
+//   }
+// }
+// console.log(maxStudent)
+// console.log(maxScore)
+// printStudents(maxStudent)
