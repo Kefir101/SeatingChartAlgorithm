@@ -1,8 +1,9 @@
-const gridSize = 5;
+const gridSize = 8;
 let positionScore = 0;
 let previousPositionScore = positionScore;
-let students = []; //2 x 5 grid
-let studentCount = 2 * gridSize;
+let students = []; 
+let width = 4;
+let studentCount = width * gridSize;
 const preferenceCount = 2;
 class Student {
   constructor(name_, frontPreference_, backPreference_, sitNextTo_, doNotSitNextTo_) {
@@ -16,7 +17,7 @@ class Student {
   }
 }
 function setup() {
-  createCanvas(1000, 1000);
+  createCanvas(window.innerWidth, window.innerHeight);
   for (let i = 0; i < studentCount; i++) {
     let sidePreference = Math.random() < 0.5;
     students.push(new Student("Bob" + i, sidePreference, !sidePreference, new Array(preferenceCount), new Array(preferenceCount)));
@@ -34,25 +35,38 @@ function setup() {
   loopChanges();
 }
 function draw() {
-  let x = 50, y = 50;
+  let scale = 2;
+  let x = window.innerWidth-gridSize*100*scale - 3*50, y = 25;
+  let xReset = x;
+  let spacing = 20 * scale;
   fill(255, 0, 0);
-  rect(0, 0, 500, 300);
-  textSize(10);
+  rect(0, 0, window.innerWidth*0.99, window.innerHeight*0.99);
   stroke(0);
   fill(0)
   for (let i = 0; i < students.length; i++) {
     let student = students[i]
+    textSize(12 * scale);
     text(student.name, x, y);
-    text(student.sitNextTo, x - 20, y + 20);
-    text(student.doNotSitNextTo, x - 20, y + 40);
-    text("Happy: " + student.happy, x - 20, y + 60);
-    text("Sad: " + student.sad, x - 20, y + 80);
-    x += 100;
-    if (x >= 500) {
-      x = 50;
-      y += 100;
+    textSize(8 * scale);
+    text("Likes: " + student.sitNextTo, x - spacing, y + spacing);
+    text("Hates: " + student.doNotSitNextTo, x - spacing, y + spacing * 2);
+    text("Happy: " + student.happy, x - spacing, y + spacing * 3);
+    text("Sad: " + student.sad, x - spacing, y + spacing * 4);
+    console.log("x: " + x + ", y: " + y + ", name: " + student.name);
+    x += 100 * scale;
+    if ((i + 1) % gridSize == 0) {
+      console.log(i)
+      x = xReset;
+      y += 100 * scale;
     }
   }
+  let frontYPos = 100*scale;
+  let backYPos = 100*scale*(width-1);
+  stroke(0, 255, 0)
+  strokeWeight(3);
+  line(0, frontYPos, window.innerWidth*0.99, frontYPos);
+  stroke(0, 0, 255)
+  line(0, backYPos, window.innerWidth*0.99, backYPos);
   noLoop();
 }
 function studentPreferenceIndexes(preferenceCount_, selfIndex) {
@@ -132,10 +146,10 @@ function swapCountAndScore() {
   return positionScoreChange;
 }
 function loopChanges() {
+  var t0 = performance.now()
 
   let storeStudents = [];
   let storeScores = [];
-
   for (let i = 0; i < 100000; i++) {
     shuffleStudents();
     countScore();
@@ -149,6 +163,23 @@ function loopChanges() {
   console.log(storeScores[indexOfMaxValue])
   printStudents(storeStudents[indexOfMaxValue])
 
+  // let studentsAndScoresMap = new Map(); 
+  // for (let i = 0; i < 100000; i++) {
+  //   shuffleStudents();
+  //   countScore();
+  //   let studentKey = [];
+  //   for (let j = 0; j < students.length; j++) studentKey.push(Object.assign({}, students[j]))
+  //   studentsAndScoresMap.set(studentKey, positionScore);
+  // }
+  // console.log(studentsAndScoresMap)
+  // let max = [...studentsAndScoresMap.entries()].reduce((a, e ) => e[1] > a[1] ? e : a);
+  // students = max[0];
+  // let maxScore = max[1];
+  // console.log(maxScore)
+  // printStudents(students)
+
+  var t1 = performance.now()
+  console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
 }
 function printStudents(students_) {
   let names = "", happy = "", frontPref = "", backPref = "", sitNextTo = "", doNotSitNextTo = "";
