@@ -31,8 +31,8 @@ function setup() {
     }
   }
   shuffleStudents();
-  countScore();
-  loopChanges();
+  countSeatingChartScore();
+  findOptimalSeatingChart();
 }
 function draw() {
   let scale = 2;
@@ -52,10 +52,9 @@ function draw() {
     text("Hates: " + student.doNotSitNextTo, x - spacing, y + spacing * 2);
     text("Happy: " + student.happy, x - spacing, y + spacing * 3);
     text("Sad: " + student.sad, x - spacing, y + spacing * 4);
-    console.log("x: " + x + ", y: " + y + ", name: " + student.name);
+    // console.log("x: " + x + ", y: " + y + ", name: " + student.name);
     x += 100 * scale;
     if ((i + 1) % gridSize == 0) {
-      console.log(i)
       x = xReset;
       y += 100 * scale;
     }
@@ -98,7 +97,7 @@ function swapStudents() {
   students[student1Index] = students[student2Index];
   students[student2Index] = student1Temp;
 }
-function countScore() {
+function countSeatingChartScore() {
   positionScore = 0;
   for (let i = 0; i < students.length; i++) {
     let s = students[i];
@@ -138,45 +137,24 @@ function countScore() {
     if (students.length - i <= gridSize && backPreference) positionScore += 5;
   }
 }
-function swapCountAndScore() {
-  swapStudents();
-  countScore();
-  let positionScoreChange = positionScore - previousPositionScore;
-  previousPositionScore = positionScore;
-  return positionScoreChange;
-}
-function loopChanges() {
+function findOptimalSeatingChart() {
   var t0 = performance.now()
 
-  let storeStudents = [];
-  let storeScores = [];
+  let bestStudentCombination = students;
+  let bestStudentCombinationScore = 0;
   for (let i = 0; i < 100000; i++) {
     shuffleStudents();
-    countScore();
-    let studentKey = [];
-    for (let j = 0; j < students.length; j++) studentKey.push(Object.assign({}, students[j]))
-    storeStudents.push(studentKey);
-    storeScores.push(positionScore);
+    countSeatingChartScore();
+    let currentStudentCombination = [];
+    for (let j = 0; j < students.length; j++) currentStudentCombination.push(Object.assign({}, students[j]))
+    if(positionScore > bestStudentCombinationScore){
+      bestStudentCombination = currentStudentCombination;
+      bestStudentCombinationScore = positionScore;
+    }
   }
-  var indexOfMaxValue = storeScores.reduce((iMax, x, i, storeScores) => x > storeScores[iMax] ? i : iMax, 0); //google
-  students = storeStudents[indexOfMaxValue];
-  console.log(storeScores[indexOfMaxValue])
-  printStudents(storeStudents[indexOfMaxValue])
-
-  // let studentsAndScoresMap = new Map(); 
-  // for (let i = 0; i < 100000; i++) {
-  //   shuffleStudents();
-  //   countScore();
-  //   let studentKey = [];
-  //   for (let j = 0; j < students.length; j++) studentKey.push(Object.assign({}, students[j]))
-  //   studentsAndScoresMap.set(studentKey, positionScore);
-  // }
-  // console.log(studentsAndScoresMap)
-  // let max = [...studentsAndScoresMap.entries()].reduce((a, e ) => e[1] > a[1] ? e : a);
-  // students = max[0];
-  // let maxScore = max[1];
-  // console.log(maxScore)
-  // printStudents(students)
+  students = bestStudentCombination;
+  console.log(bestStudentCombinationScore)
+  printStudents(students)
 
   var t1 = performance.now()
   console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
@@ -198,11 +176,11 @@ function printStudents(students_) {
   }
   console.log("----------------------------------");
   console.log(names);
-  console.log("Happy: " + happy);
-  console.log("Front pref: " + frontPref);
-  console.log("Back pref: " + backPref);
-  console.log("Sit Next To: " + sitNextTo);
-  console.log("Do Not Sit Next To: " + doNotSitNextTo);
+  // console.log("Happy: " + happy);
+  // console.log("Front pref: " + frontPref);
+  // console.log("Back pref: " + backPref);
+  // console.log("Sit Next To: " + sitNextTo);
+  // console.log("Do Not Sit Next To: " + doNotSitNextTo);
 }
 function shuffleStudents() {
   var currentIndex = students.length, randomIndex;
@@ -261,3 +239,24 @@ function shuffleStudents() {
 // console.log(maxStudent)
 // console.log(maxScore)
 // printStudents(maxStudent)
+  // let studentsAndScoresMap = new Map(); 
+  // for (let i = 0; i < 100000; i++) {
+  //   shuffleStudents();
+  //   countScore();
+  //   let studentKey = [];
+  //   for (let j = 0; j < students.length; j++) studentKey.push(Object.assign({}, students[j]))
+  //   studentsAndScoresMap.set(studentKey, positionScore);
+  // }
+  // console.log(studentsAndScoresMap)
+  // let max = [...studentsAndScoresMap.entries()].reduce((a, e ) => e[1] > a[1] ? e : a);
+  // students = max[0];
+  // let maxScore = max[1];
+  // console.log(maxScore)
+  // printStudents(students)
+  // function swapStudentsAndCountSeatingChartScore() {
+//   swapStudents();
+//   countSeatingChartScore();
+//   let positionScoreChange = positionScore - previousPositionScore;
+//   previousPositionScore = positionScore;
+//   return positionScoreChange;
+// }
