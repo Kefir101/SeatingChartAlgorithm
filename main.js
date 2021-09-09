@@ -101,13 +101,8 @@ function countSeatingChartScore() {
   positionScore = 0;
   for (let i = 0; i < students.length; i++) {
     let s = students[i];
-    let frontPreference = s.frontPreference;
-    let backPreference = s.backPreference;
-    let sitNextTo = s.sitNextTo;
-    let doNotSitNextTo = s.doNotSitNextTo;
     let closeIndexes = [i + 1, i - 1, i + gridSize, i - gridSize];
     let closeNames = [];
-    let nameCount = preferenceCount * 2;
     for (let j = 0; j < closeIndexes.length; j++) {
       let pos = closeIndexes[j];
       if (pos < 0 || pos >= students.length) continue;
@@ -125,16 +120,16 @@ function countSeatingChartScore() {
     s.sad = "";
     for (let j = 0; j < closeNames.length; j++) {
       let closeName = closeNames[j];
-      if (sitNextTo.includes(closeName)) {
+      if (s.sitNextTo.includes(closeName)) {
         positionScore += 100;
         s.happy += closeName + ", ";
-      } else if (doNotSitNextTo.includes(closeName)) {
+      } else if (s.doNotSitNextTo.includes(closeName)) {
         positionScore -= 200;
         s.sad += closeName + ", ";
       }
     }
-    if (i < gridSize && frontPreference) positionScore += 5;
-    if (students.length - i <= gridSize && backPreference) positionScore += 5;
+    if (i < gridSize && s.frontPreference) positionScore += 5;
+    if (students.length - i <= gridSize && s.backPreference) positionScore += 5;
   }
 }
 function findOptimalSeatingChart() {
