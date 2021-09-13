@@ -46,6 +46,7 @@ function draw() {
   for (let i = 0; i < students.length; i++) {
     let student = students[i]
     textSize(12 * scale);
+    strokeWeight(1);
     text(student.name, x, y);
     textSize(8 * scale);
     text("Likes: " + student.sitNextTo, x - spacing, y + spacing);
@@ -53,19 +54,30 @@ function draw() {
     text("Happy: " + student.happy, x - spacing, y + spacing * 3);
     text("Sad: " + student.sad, x - spacing, y + spacing * 4);
     // console.log("x: " + x + ", y: " + y + ", name: " + student.name);
+    // strokeWeight(3);
+    // line(x - spacing, y - spacing, x - spacing, y + spacing * 4)
     x += 100 * scale;
     if ((i + 1) % gridSize == 0) {
       x = xReset;
       y += 100 * scale;
     }
   }
-  let frontYPos = 100*scale;
+  let frontYPos = 0;
   let backYPos = 100*scale*(width-1);
-  stroke(0, 255, 0)
+  let leftEdge = xReset - spacing;
+  let rightEdge = leftEdge+100*scale*gridSize;
+  stroke(0, 255, 0);
   strokeWeight(3);
-  line(0, frontYPos, window.innerWidth*0.99, frontYPos);
-  stroke(0, 0, 255)
-  line(0, backYPos, window.innerWidth*0.99, backYPos);
+  line(leftEdge, frontYPos, rightEdge, frontYPos);
+  line(leftEdge, frontYPos+100*scale, rightEdge, frontYPos+100*scale);
+  line(leftEdge, frontYPos, leftEdge, frontYPos+100*scale);
+  line(rightEdge, frontYPos, rightEdge, frontYPos+100*scale);
+
+  stroke(0, 0, 255);
+  line(leftEdge, backYPos, rightEdge, backYPos);
+  line(leftEdge, backYPos+100*scale, rightEdge, backYPos+100*scale);
+  line(leftEdge, backYPos, leftEdge, backYPos+100*scale);
+  line(rightEdge, backYPos, rightEdge, backYPos+100*scale);
   noLoop();
 }
 function studentPreferenceIndexes(preferenceCount_, selfIndex) {
@@ -94,7 +106,11 @@ function countSeatingChartScore() {
   seatingChartScore = 0;
   for (let i = 0; i < students.length; i++) {
     let s = students[i];
-    let closeIndexes = [i + 1, i - 1, i + gridSize, i - gridSize];
+    let left = i - 1;
+    let right = i + 1;
+    let inFront = i - gridSize;
+    let behind = i + gridSize;
+    let closeIndexes = [left, right, inFront, behind, inFront - 1, inFront + 1, behind - 1, behind + 1];
     let closeNames = [];
     for (let j = 0; j < closeIndexes.length; j++) {
       let pos = closeIndexes[j];
@@ -102,7 +118,6 @@ function countSeatingChartScore() {
       if (pos == i + 1 && i + 1 % gridSize == 0) continue;
       if (pos == i - 1 && i % gridSize == 0) continue;
       closeNames.push(students[pos].name);
-      if (closeNames.length == 2) break;
     }
     // let closeNamesTemp = [];
     // for (let j = 0; j < nameCount; j++)
